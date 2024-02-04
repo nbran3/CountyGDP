@@ -1,4 +1,4 @@
-### Import libaries
+### Import libraries
 import folium
 import os
 import pandas as pd
@@ -8,7 +8,7 @@ import pypyodbc
 ### Create a variable for folium to read the JSON file. This might not be needed if you are working with countries for example, but since I was using counties I got a shapefile (json). 
 counties = os.path.join('data', 'counties.geojson')
 
-### You can either connect to a local SQL database or just use a CSV for the data. I would recommeded using a CSV file unless the data you are using is extremely big, but I did this for experimental reasons. 
+### You can either connect to a local SQL database or just use a CSV for the data. I would recommend using a CSV file unless the data you are using is extremely big, but I did this for experimental reasons. 
 conn = pypyodbc.connect('Driver={SQL SERVER};'
                         'Server=DESKTOP-K4HURDS\SQLEXPRESS01;'
                         'Database=Projects;'
@@ -22,7 +22,7 @@ WHERE GDP2022 < 200000
 rpiResults = pd.read_sql(query, conn)
 
 
-### You do not need to this, but since I wanted to make a tooltip that displays the GDP value with the county name, the SQL query needs to be ingested into the JSON file so it can work.  
+### You do not need to do this, but since I wanted to make a tooltip that displays the GDP value with the county name, the SQL query needs to be ingested into the JSON file so it can work.  
 rpiJSON = rpiResults[['geofips', 'gdp2022']]
 
 # Load the existing GeoJSON file
@@ -43,7 +43,7 @@ with open('updated_geojson_file.json', 'w') as updated_geojson_file:
     json.dump(geojson_data, updated_geojson_file, indent=2)
 
 ### Create folium map, folium will write the HTML, Leaflet for you as long as you input and key the data correctly between the two sources.
-map = folium.Map(location=[46.879002,-103.789879], zoom_start=5.4, tiles=r'https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attr="US GDP 2022 Choropleth map by county.")
+map = folium.Map(location=[46.879002,-103.789879], zoom_start=5.4, tiles=r'https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attr="US GDP 2022 Choropleth map by county.")
 
 folium.Choropleth(
     geo_data = counties,
@@ -51,7 +51,7 @@ folium.Choropleth(
     data = rpiResults,
     columns = ['geofips' , 'gdp2022'],
     key_on = 'properties.GEOID',
-    fill_color = 'RdYlGn',
+    fill_color = 'Pastel1',
     fill_opacity = 1,
     line_opacity = 1,
     nan_fill_color = '#f2efe9',
@@ -67,7 +67,9 @@ g = folium.GeoJson(
 ).add_to(map)
 
 folium.GeoJsonTooltip(fields=["NAME", 'gdp2022'], aliases=["County Name", "GDP 2022"]).add_to(g)
-from folium.plugins import FloatSlider
+
+### Save to index.html and then view it in the browser  
+map.save('index.html')
 
 
 ### Save to index.html and then view it in
